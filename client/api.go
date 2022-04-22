@@ -49,6 +49,7 @@ import (
 	"github.com/stripe/stripe-go/v72/order"
 	"github.com/stripe/stripe-go/v72/orderreturn"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"github.com/stripe/stripe-go/v72/paymentlink"
 	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/paymentsource"
 	"github.com/stripe/stripe-go/v72/payout"
@@ -68,6 +69,7 @@ import (
 	"github.com/stripe/stripe-go/v72/review"
 	"github.com/stripe/stripe-go/v72/setupattempt"
 	"github.com/stripe/stripe-go/v72/setupintent"
+	"github.com/stripe/stripe-go/v72/shippingrate"
 	sigmascheduledqueryrun "github.com/stripe/stripe-go/v72/sigma/scheduledqueryrun"
 	"github.com/stripe/stripe-go/v72/sku"
 	"github.com/stripe/stripe-go/v72/source"
@@ -78,9 +80,13 @@ import (
 	"github.com/stripe/stripe-go/v72/taxcode"
 	"github.com/stripe/stripe-go/v72/taxid"
 	"github.com/stripe/stripe-go/v72/taxrate"
+	terminalconfiguration "github.com/stripe/stripe-go/v72/terminal/configuration"
 	terminalconnectiontoken "github.com/stripe/stripe-go/v72/terminal/connectiontoken"
 	terminallocation "github.com/stripe/stripe-go/v72/terminal/location"
 	terminalreader "github.com/stripe/stripe-go/v72/terminal/reader"
+	testhelpersrefund "github.com/stripe/stripe-go/v72/testhelpers/refund"
+	testhelpersterminalreader "github.com/stripe/stripe-go/v72/testhelpers/terminal/reader"
+	testhelperstestclock "github.com/stripe/stripe-go/v72/testhelpers/testclock"
 	"github.com/stripe/stripe-go/v72/token"
 	"github.com/stripe/stripe-go/v72/topup"
 	"github.com/stripe/stripe-go/v72/transfer"
@@ -171,6 +177,8 @@ type API struct {
 	Orders *order.Client
 	// PaymentIntents is the client used to invoke /payment_intents APIs.
 	PaymentIntents *paymentintent.Client
+	// PaymentLinks is the client used to invoke /payment_links APIs.
+	PaymentLinks *paymentlink.Client
 	// PaymentMethods is the client used to invoke /payment_methods APIs.
 	PaymentMethods *paymentmethod.Client
 	// PaymentSource is the client used to invoke /customers/{customer}/sources APIs.
@@ -209,13 +217,15 @@ type API struct {
 	SetupAttempts *setupattempt.Client
 	// SetupIntents is the client used to invoke /setup_intents APIs.
 	SetupIntents *setupintent.Client
+	// ShippingRates is the client used to invoke /shipping_rates APIs.
+	ShippingRates *shippingrate.Client
 	// SigmaScheduledQueryRuns is the client used to invoke /sigma/scheduled_query_runs APIs.
 	SigmaScheduledQueryRuns *sigmascheduledqueryrun.Client
 	// Skus is the client used to invoke /skus APIs.
 	Skus *sku.Client
 	// Sources is the client used to invoke /sources APIs.
 	Sources *source.Client
-	// SourceTransactions is the client used to invoke source transactions related APIs
+	// SourceTransactions is the client used to invoke sourcetransaction related APIs.
 	SourceTransactions *sourcetransaction.Client
 	// SubscriptionItems is the client used to invoke /subscription_items APIs.
 	SubscriptionItems *subitem.Client
@@ -229,12 +239,20 @@ type API struct {
 	TaxIDs *taxid.Client
 	// TaxRates is the client used to invoke /tax_rates APIs.
 	TaxRates *taxrate.Client
+	// TerminalConfigurations is the client used to invoke /terminal/configurations APIs.
+	TerminalConfigurations *terminalconfiguration.Client
 	// TerminalConnectionTokens is the client used to invoke /terminal/connection_tokens APIs.
 	TerminalConnectionTokens *terminalconnectiontoken.Client
 	// TerminalLocations is the client used to invoke /terminal/locations APIs.
 	TerminalLocations *terminallocation.Client
 	// TerminalReaders is the client used to invoke /terminal/readers APIs.
 	TerminalReaders *terminalreader.Client
+	// TestHelpersRefunds is the client used to invoke /refunds APIs.
+	TestHelpersRefunds *testhelpersrefund.Client
+	// TestHelpersTerminalReaders is the client used to invoke /terminal/readers APIs.
+	TestHelpersTerminalReaders *testhelpersterminalreader.Client
+	// TestHelpersTestClocks is the client used to invoke /test_helpers/test_clocks APIs.
+	TestHelpersTestClocks *testhelperstestclock.Client
 	// Tokens is the client used to invoke /tokens APIs.
 	Tokens *token.Client
 	// Topups is the client used to invoke /topups APIs.
@@ -295,10 +313,11 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	a.IssuingTransactions = &issuingtransaction.Client{B: backends.API, Key: key}
 	a.LoginLinks = &loginlink.Client{B: backends.API, Key: key}
 	a.Mandates = &mandate.Client{B: backends.API, Key: key}
-	a.OAuth = &oauth.Client{B: backends.API, Key: key}
+	a.OAuth = &oauth.Client{B: backends.Connect, Key: key}
 	a.OrderReturns = &orderreturn.Client{B: backends.API, Key: key}
 	a.Orders = &order.Client{B: backends.API, Key: key}
 	a.PaymentIntents = &paymentintent.Client{B: backends.API, Key: key}
+	a.PaymentLinks = &paymentlink.Client{B: backends.API, Key: key}
 	a.PaymentMethods = &paymentmethod.Client{B: backends.API, Key: key}
 	a.PaymentSource = &paymentsource.Client{B: backends.API, Key: key}
 	a.Payouts = &payout.Client{B: backends.API, Key: key}
@@ -318,6 +337,7 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	a.Reviews = &review.Client{B: backends.API, Key: key}
 	a.SetupAttempts = &setupattempt.Client{B: backends.API, Key: key}
 	a.SetupIntents = &setupintent.Client{B: backends.API, Key: key}
+	a.ShippingRates = &shippingrate.Client{B: backends.API, Key: key}
 	a.SigmaScheduledQueryRuns = &sigmascheduledqueryrun.Client{B: backends.API, Key: key}
 	a.Skus = &sku.Client{B: backends.API, Key: key}
 	a.Sources = &source.Client{B: backends.API, Key: key}
@@ -328,9 +348,13 @@ func (a *API) Init(key string, backends *stripe.Backends) {
 	a.TaxCodes = &taxcode.Client{B: backends.API, Key: key}
 	a.TaxIDs = &taxid.Client{B: backends.API, Key: key}
 	a.TaxRates = &taxrate.Client{B: backends.API, Key: key}
+	a.TerminalConfigurations = &terminalconfiguration.Client{B: backends.API, Key: key}
 	a.TerminalConnectionTokens = &terminalconnectiontoken.Client{B: backends.API, Key: key}
 	a.TerminalLocations = &terminallocation.Client{B: backends.API, Key: key}
 	a.TerminalReaders = &terminalreader.Client{B: backends.API, Key: key}
+	a.TestHelpersRefunds = &testhelpersrefund.Client{B: backends.API, Key: key}
+	a.TestHelpersTerminalReaders = &testhelpersterminalreader.Client{B: backends.API, Key: key}
+	a.TestHelpersTestClocks = &testhelperstestclock.Client{B: backends.API, Key: key}
 	a.Tokens = &token.Client{B: backends.API, Key: key}
 	a.Topups = &topup.Client{B: backends.API, Key: key}
 	a.Transfers = &transfer.Client{B: backends.API, Key: key}

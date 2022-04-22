@@ -8,7 +8,7 @@ package stripe
 
 import "encoding/json"
 
-// A list of [all tax codes available](https://stripe.com/docs/tax/tax-codes) to add to Products in order to allow specific tax calculations.
+// A list of [all tax codes available](https://stripe.com/docs/tax/tax-categories) to add to Products in order to allow specific tax calculations.
 type TaxCodeListParams struct {
 	ListParams `form:"*"`
 }
@@ -18,13 +18,17 @@ type TaxCodeParams struct {
 	Params `form:"*"`
 }
 
-// [Tax codes](https://stripe.com/docs/tax/tax-codes) classify goods and services for tax purposes.
+// [Tax codes](https://stripe.com/docs/tax/tax-categories) classify goods and services for tax purposes.
 type TaxCode struct {
 	APIResource
+	// A detailed description of which types of products the tax code represents.
 	Description string `json:"description"`
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Object      string `json:"object"`
+	// Unique identifier for the object.
+	ID string `json:"id"`
+	// A short name for the tax code.
+	Name string `json:"name"`
+	// String representing the object's type. Objects of the same type share the same value.
+	Object string `json:"object"`
 }
 
 // TaxCodeList is a list of TaxCodes as retrieved from a list endpoint.

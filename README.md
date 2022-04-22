@@ -1,6 +1,5 @@
 # Go Stripe
-
-[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stripe/stripe-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/stripe/stripe-go)](https://pkg.go.dev/github.com/stripe/stripe-go)
 [![Build Status](https://travis-ci.org/stripe/stripe-go.svg?branch=master)](https://travis-ci.org/stripe/stripe-go)
 [![Coverage Status](https://coveralls.io/repos/github/stripe/stripe-go/badge.svg?branch=master)](https://coveralls.io/github/stripe/stripe-go?branch=master)
 
@@ -19,8 +18,8 @@ Then, reference stripe-go in a Go program with `import`:
 
 ``` go
 import (
-    "github.com/stripe/stripe-go/v72"
-    "github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/customer"
 )
 ```
 
@@ -29,7 +28,7 @@ toolchain will resolve and fetch the stripe-go module automatically.
 
 Alternatively, you can also explicitly `go get` the package into a project:
 
-```
+```bash
 go get -u github.com/stripe/stripe-go/v72
 ```
 
@@ -40,8 +39,8 @@ documentation][api-docs].
 
 See [video demonstrations][youtube-playlist] covering how to use the library.
 
-For details on all the functionality in this library, see the [GoDoc][godoc]
-documentation.
+For details on all the functionality in this library, see the [Go
+documentation][goref].
 
 Below are a few simple examples:
 
@@ -49,18 +48,19 @@ Below are a few simple examples:
 
 ```go
 params := &stripe.CustomerParams{
-	Description: stripe.String("Stripe Developer"),
-	Email:       stripe.String("gostripe@stripe.com"),
+	Description:      stripe.String("Stripe Developer"),
+	Email:            stripe.String("gostripe@stripe.com"),
+	PreferredLocales: stripe.StringSlice([]string{"en", "es"}),
 }
 
-customer, err := customer.New(params)
+c, err := customer.New(params)
 ```
 
 ### PaymentIntents
 
 ```go
 params := &stripe.PaymentIntentListParams{
-    Customer: stripe.String(customer.ID),
+	Customer: stripe.String(customer.ID),
 }
 
 // set this so you can easily retry your request in case of a timeout
@@ -148,20 +148,20 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-        c := appengine.NewContext(r)
-        httpClient := urlfetch.Client(c)
+	c := appengine.NewContext(r)
+	httpClient := urlfetch.Client(c)
 
-        sc := stripeClient.New("sk_test_123", stripe.NewBackends(httpClient))
+	sc := stripeClient.New("sk_test_123", stripe.NewBackends(httpClient))
 
-        params := &stripe.CustomerParams{
-            Description: stripe.String("Stripe Developer"),
-            Email:       stripe.String("gostripe@stripe.com"),
-        }
-        customer, err := sc.Customers.New(params)
-        if err != nil {
-            fmt.Fprintf(w, "Could not create customer: %v", err)
-        }
-        fmt.Fprintf(w, "Customer created: %v", customer.ID)
+	params := &stripe.CustomerParams{
+		Description: stripe.String("Stripe Developer"),
+		Email:       stripe.String("gostripe@stripe.com"),
+	}
+	customer, err := sc.Customers.New(params)
+	if err != nil {
+		fmt.Fprintf(w, "Could not create customer: %v", err)
+	}
+	fmt.Fprintf(w, "Customer created: %v", customer.ID)
 }
 ```
 
@@ -255,7 +255,7 @@ Use `LastResponse` on any `APIResource` to look at the API response that
 generated the current object:
 
 ``` go
-coupon, err := coupon.New(...)
+c, err := coupon.New(...)
 requestID := coupon.LastResponse.RequestID
 ```
 
@@ -379,9 +379,9 @@ identified using `stripe.SetAppInfo`:
 
 ```go
 stripe.SetAppInfo(&stripe.AppInfo{
-    Name:    "MyAwesomePlugin",
-    URL:     "https://myawesomeplugin.info",
-    Version: "1.2.34",
+	Name:    "MyAwesomePlugin",
+	URL:     "https://myawesomeplugin.info",
+	Version: "1.2.34",
 })
 ```
 
@@ -443,16 +443,16 @@ Run a single test:
 For any requests, bug or comments, please [open an issue][issues] or [submit a
 pull request][pulls].
 
-[api-docs]: https://stripe.com/docs/api/go
+[api-docs]: https://stripe.com/docs/api/?lang=go
 [api-changelog]: https://stripe.com/docs/upgrades
 [apiresponse]: https://godoc.org/github.com/stripe/stripe-go#APIResponse
 [connect]: https://stripe.com/docs/connect/authentication
 [depgomodsupport]: https://github.com/golang/dep/pull/1963
 [expandableobjects]: https://stripe.com/docs/api/expanding_objects
-[godoc]: http://godoc.org/github.com/stripe/stripe-go
+[goref]: https://pkg.go.dev/github.com/stripe/stripe-go
 [gomodrevert]: https://github.com/stripe/stripe-go/pull/774
 [gomodvsdep]: https://github.com/stripe/stripe-go/pull/712
-[idempotency-keys]: https://stripe.com/docs/api/ruby#idempotent_requests
+[idempotency-keys]: https://stripe.com/docs/api/idempotent_requests?lang=go
 [issues]: https://github.com/stripe/stripe-go/issues/new
 [logrus]: https://github.com/sirupsen/logrus/
 [modules]: https://github.com/golang/go/wiki/Modules
